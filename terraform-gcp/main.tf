@@ -71,17 +71,17 @@ resource "google_service_account" "gpu_node_sa" {
   display_name = "GPU Node Service Account"
 }
 
-resource "google_project_iam_member" "gpu_node_log_writer" {
-  project = var.project_id
-  role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${google_service_account.gpu_node_sa.email}"
-}
+# resource "google_project_iam_member" "gpu_node_log_writer" {
+#   project = var.project_id
+#   role    = "roles/logging.logWriter"
+#   member  = "serviceAccount:${google_service_account.gpu_node_sa.email}"
+# }
 
-resource "google_project_iam_member" "gpu_node_metric_writer" {
-  project = var.project_id
-  role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${google_service_account.gpu_node_sa.email}"
-}
+# resource "google_project_iam_member" "gpu_node_metric_writer" {
+#   project = var.project_id
+#   role    = "roles/monitoring.metricWriter"
+#   member  = "serviceAccount:${google_service_account.gpu_node_sa.email}"
+# }
 
 # 8. GPU Node (Compute Engine VM in Private Subnet)
 resource "google_compute_instance" "gpu_node" {
@@ -93,7 +93,7 @@ resource "google_compute_instance" "gpu_node" {
   boot_disk {
     initialize_params {
       # Deep Learning VM image with CUDA pre-installed
-      image = "projects/deeplearning-platform-release/global/images/family/common-cu121-debian-11"
+      image = "debian-cloud/debian-11"
       size  = 100
       type  = "pd-ssd"
     }
@@ -105,13 +105,13 @@ resource "google_compute_instance" "gpu_node" {
     # No access_config block = no public IP (private only)
   }
 
-  guest_accelerator {
-    type  = var.gpu_type
-    count = var.gpu_count
-  }
+  # guest_accelerator {
+  #   type  = var.gpu_type
+  #   count = var.gpu_count
+  # }
 
   scheduling {
-    on_host_maintenance = "TERMINATE"
+    on_host_maintenance = "MIGRATE"
     automatic_restart   = true
   }
 
